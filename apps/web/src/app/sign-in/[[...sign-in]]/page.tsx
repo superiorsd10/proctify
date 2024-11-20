@@ -26,6 +26,10 @@ export default function SignInPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const handleSignUpClick = () => {
+    router.push("/sign-up");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoaded) return;
@@ -127,9 +131,12 @@ export default function SignInPage() {
           </Button>
           <div className="text-sm text-center">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
+            <button
+              onClick={handleSignUpClick}
+              className="text-primary hover:underline"
+            >
               Sign up
-            </Link>
+            </button>
           </div>
         </CardFooter>
       </Card>
