@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 import { load as cocoSSDLoad } from "@tensorflow-models/coco-ssd";
+import * as blazeface from "@tensorflow-models/blazeface";
 import Webcam from "react-webcam";
 import { DetectionOptions, Prediction } from "@/types/detectionTypes";
 import { useFullScreen } from "./useFullScreen";
@@ -32,6 +33,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
   const modelRef = useRef<any>(null);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const personAbsentStartTime = useRef<number | null>(null);
+  const faceModelRef = useRef<any>(null);
 
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullScreen(
     options.onBrowserViolation
@@ -92,6 +94,20 @@ export const useDetection = (options: DetectionOptions = {}) => {
 
         console.log("Predictions:", predictions);
 
+        // Face Detection
+        if (faceModelRef.current) {
+          const faces = await faceModelRef.current.estimateFaces(video);
+
+          console.log("Detected Faces:", faces);
+
+          // Check for multiple faces
+          if (faces && faces.length > 1) {
+            currentViolations.push(
+              `Multiple faces detected: ${faces.length} faces in the frame`
+            );
+          }
+        }
+
         // Check for prohibited objects
         predictions.forEach((prediction: Prediction) => {
           const detectedClass = prediction.class.toLowerCase();
@@ -140,6 +156,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
         await tf.setBackend("webgl");
         await tf.ready();
         modelRef.current = await cocoSSDLoad();
+        faceModelRef.current = await blazeface.load();
         await initializeAudio();
         setIsLoading(false);
       } catch (error) {
