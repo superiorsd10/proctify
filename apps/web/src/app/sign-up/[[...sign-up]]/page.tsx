@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@repo/ui/components/ui/card";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
+import { createUser } from "@/actions";
 
 export default function SignUpPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -39,6 +40,10 @@ export default function SignUpPage() {
       });
 
       if (result.status === "complete") {
+        await createUser({
+          username,
+          email,
+        });
         await setActive({ session: result.createdSessionId });
         router.push("/");
       } else {
