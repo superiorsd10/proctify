@@ -12,3 +12,39 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String
+  email    String @unique
+  tests    Test[] @relation("UserTests")
+  logs     Log[]  @relation("UserLogs")
+}
+
+model Test {
+  id            Int      @id @default(autoincrement())
+  title         String
+  createdBy     Int
+  link          String
+  startTime     DateTime
+  duration      Int
+  code          String
+  createdByUser User     @relation("UserTests", fields: [createdBy], references: [id])
+  logs          Log[]
+}
+
+model Log {
+  id                         Int  @id @default(autoincrement())
+  testId                     Int
+  userId                     Int
+  audioViolations            Int  @default(0)
+  noFaceViolations           Int  @default(0)
+  multipleFaceViolations     Int  @default(0)
+  keypressViolations         Int  @default(0)
+  rightClickViolations       Int  @default(0)
+  windowChangeViolations     Int  @default(0)
+  prohibitedObjectViolations Int  @default(0)
+  ufmScore                   Int  @default(0)
+  test                       Test @relation(fields: [testId], references: [id])
+  user                       User @relation("UserLogs", fields: [userId], references: [id])
+}
