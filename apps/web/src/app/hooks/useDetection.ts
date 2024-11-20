@@ -16,10 +16,17 @@ interface Prediction {
   score: number;
 }
 
+interface extWindow extends Window {
+  AudioContext: typeof AudioContext;
+  webkitAudioContext: typeof AudioContext;
+}
+
+declare let window: extWindow;
+
 export const useDetection = (options: DetectionOptions = {}) => {
   const {
     objectThreshold = 0.4,
-    noiseThreshold = 0.1,
+    noiseThreshold = 60,
     prohibitedObjects = [
       "cell phone",
       "mobile phone",
@@ -39,6 +46,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
   const modelRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const initializeDetection = useCallback(async () => {
     try {
@@ -50,7 +58,8 @@ export const useDetection = (options: DetectionOptions = {}) => {
 
       // Audio Detection
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new AudioContext();
+      audioContextRef.current = new (window.AudioContext ||
+        window.webkitAudioContext)();
       const analyser = audioContextRef.current.createAnalyser();
       const microphone =
         audioContextRef.current.createMediaStreamSource(stream);
@@ -66,6 +75,25 @@ export const useDetection = (options: DetectionOptions = {}) => {
     }
   }, []);
 
+  const calculateNoiseLevel = useCallback(() => {
+    if (analyserRef.current) {
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteTimeDomainData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += (dataArray[i] - 128) * (dataArray[i] - 128);
+      }
+
+      const average = sum / dataArray.length;
+      const volumeInDb = 20 * Math.log10(Math.sqrt(average) / 128);
+      const adjustedVolumeInDb = volumeInDb + 100; // Adjust base level
+
+      return Math.max(0, Number(adjustedVolumeInDb.toFixed(0)));
+    }
+    return 0;
+  }, []);
+
   const runDetection = useCallback(async () => {
     const currentViolations: string[] = [];
 
@@ -79,6 +107,8 @@ export const useDetection = (options: DetectionOptions = {}) => {
           objectThreshold
         );
 
+        console.log("Predictions:", predictions);
+
         predictions.forEach((prediction: Prediction) => {
           const detectedClass = prediction.class.toLowerCase();
           if (prohibitedObjects.some((obj) => detectedClass.includes(obj))) {
@@ -91,31 +121,29 @@ export const useDetection = (options: DetectionOptions = {}) => {
     }
 
     // Audio Detection
-    if (analyserRef.current) {
-      const bufferLength = analyserRef.current.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyserRef.current.getByteFrequencyData(dataArray);
+    const currentNoiseLevel = calculateNoiseLevel();
+    setNoiseLevel(currentNoiseLevel);
 
-      const averageNoise =
-        dataArray.reduce((a, b) => a + b) / bufferLength / 255;
-      setNoiseLevel(averageNoise);
+    console.log("Current Noise Level:", currentNoiseLevel);
 
-      if (averageNoise > noiseThreshold) {
-        currentViolations.push(
-          `Noise detected: ${(averageNoise * 100).toFixed(2)}%`
-        );
-      }
+    if (currentNoiseLevel > noiseThreshold) {
+      currentViolations.push(
+        `Noise level too high: ${currentNoiseLevel}dB (threshold: ${noiseThreshold}dB)`
+      );
     }
 
     setViolations(currentViolations);
     return currentViolations;
-  }, [objectThreshold, noiseThreshold, prohibitedObjects]);
+  }, [objectThreshold, noiseThreshold, prohibitedObjects, calculateNoiseLevel]);
 
   useEffect(() => {
     initializeDetection();
     return () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
+      }
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
       }
     };
   }, [initializeDetection]);
