@@ -40,6 +40,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [violations, setViolations] = useState<string[]>([]);
   const [noiseLevel, setNoiseLevel] = useState(0);
+  const [personPresent, setPersonPresent] = useState(true);
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,6 +48,9 @@ export const useDetection = (options: DetectionOptions = {}) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+  const personAbsentStartTime = useRef<number | null>(null);
+
+  const PERSON_ABSENCE_THRESHOLD = 6000;
 
   const initializeDetection = useCallback(async () => {
     try {
@@ -94,6 +98,38 @@ export const useDetection = (options: DetectionOptions = {}) => {
     return 0;
   }, []);
 
+  const checkPersonPresence = useCallback(
+    (predictions: Prediction[]) => {
+      const personDetected = predictions.some(
+        (prediction) => prediction.class.toLowerCase() === "person"
+      );
+
+      if (!personDetected) {
+        // Person is absent
+        if (!personAbsentStartTime.current) {
+          // Start tracking absence time
+          personAbsentStartTime.current = Date.now();
+        }
+
+        // Check if absence duration exceeds threshold
+        const absenceDuration =
+          Date.now() - (personAbsentStartTime.current || 0);
+        if (absenceDuration >= PERSON_ABSENCE_THRESHOLD && personPresent) {
+          setPersonPresent(false);
+          return true; // Should generate violation
+        }
+      } else {
+        // Person is present, reset tracking
+        personAbsentStartTime.current = null;
+        if (!personPresent) {
+          setPersonPresent(true);
+        }
+      }
+      return false; // No violation
+    },
+    [personPresent]
+  );
+
   const runDetection = useCallback(async () => {
     const currentViolations: string[] = [];
 
@@ -109,6 +145,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
 
         console.log("Predictions:", predictions);
 
+        // Check for prohibited objects
         predictions.forEach((prediction: Prediction) => {
           const detectedClass = prediction.class.toLowerCase();
           if (prohibitedObjects.some((obj) => detectedClass.includes(obj))) {
@@ -117,6 +154,14 @@ export const useDetection = (options: DetectionOptions = {}) => {
             );
           }
         });
+
+        // Check for person presence
+        const personAbsent = checkPersonPresence(predictions);
+        if (personAbsent) {
+          currentViolations.push(
+            `No person detected in frame for more than ${PERSON_ABSENCE_THRESHOLD / 1000} seconds`
+          );
+        }
       }
     }
 
@@ -134,7 +179,13 @@ export const useDetection = (options: DetectionOptions = {}) => {
 
     setViolations(currentViolations);
     return currentViolations;
-  }, [objectThreshold, noiseThreshold, prohibitedObjects, calculateNoiseLevel]);
+  }, [
+    objectThreshold,
+    noiseThreshold,
+    prohibitedObjects,
+    calculateNoiseLevel,
+    checkPersonPresence,
+  ]);
 
   useEffect(() => {
     initializeDetection();
@@ -154,6 +205,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
     isLoading,
     violations,
     noiseLevel,
+    personPresent,
     runDetection,
   };
 };
