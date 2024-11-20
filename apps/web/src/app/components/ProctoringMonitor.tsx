@@ -1,16 +1,60 @@
 "use client";
 import React, { useEffect, useCallback, useRef } from "react";
 import Webcam from "react-webcam";
-import { useDetection } from "../hooks/useDetection";
+import { useDetection } from "../hooks/detection/useDetection";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
+import { BrowserViolation } from "@/types/detectionTypes";
 
 export const ProctoringMonitor: React.FC = () => {
   const { toast } = useToast();
-  const { webcamRef, canvasRef, isLoading, violations, runDetection } =
-    useDetection({
-      noiseThreshold: 60,
-      objectThreshold: 0.4,
-    });
+
+  const handleBrowserViolation = useCallback(
+    (violation: BrowserViolation) => {
+      let violationMessage = "";
+
+      switch (violation.type) {
+        case "fullscreen":
+          violationMessage = "Attempted to exit full-screen mode";
+          break;
+        case "rightclick":
+          violationMessage = "Right-click detected";
+          break;
+        case "copypaste":
+          violationMessage = "Copy-paste attempt detected";
+          break;
+        case "tab":
+          violationMessage = "Tab switching attempt detected";
+          break;
+        case "window":
+          violationMessage = "Window switching attempt detected";
+          break;
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Proctoring Violation",
+        description: violationMessage,
+      });
+    },
+    [toast]
+  );
+
+  const {
+    webcamRef,
+    canvasRef,
+    isLoading,
+    violations,
+    isFullscreen,
+    enterFullscreen,
+    runDetection,
+  } = useDetection({
+    onBrowserViolation: handleBrowserViolation,
+  });
+
+  // Request fullscreen on mount
+  useEffect(() => {
+    enterFullscreen();
+  }, [enterFullscreen]);
 
   // Keep track of previous violations
   const previousViolationsRef = useRef<string[]>([]);
