@@ -121,7 +121,7 @@ export default function SignInPage() {
               if (signIn) {
                 signIn.authenticateWithRedirect({
                   strategy: "oauth_google",
-                  redirectUrl: "/sso-callback",
+                  redirectUrl: "/sign-up/sso-callback",
                   redirectUrlComplete: "/",
                 });
               }
