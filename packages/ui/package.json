@@ -8,11 +8,12 @@
     "dist"
   ],
   "exports": {
-    "./globals.css": "./src/globals.css",
+    "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.js",
     "./tailwind.config": "./tailwind.config.ts",
     "./components/*": "./src/components/*.tsx",
-    "./utils": "./src/utils.ts"
+    "./components/hooks/*": "./src/components/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -37,6 +38,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
