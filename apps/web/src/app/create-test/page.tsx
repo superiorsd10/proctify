@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
+import { useToast } from "@repo/ui/components/hooks/use-toast";
 
 export default function CreateTest() {
   const router = useRouter();
@@ -27,6 +28,25 @@ export default function CreateTest() {
   const [link, setLink] = useState("");
   const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState("");
+
+  const { toast } = useToast();
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedTime = new Date(e.target.value);
+    const currentTime = new Date();
+
+    if (selectedTime > currentTime) {
+      setStartTime(e.target.value);
+    } else {
+      console.log("Toast should trigger"); // Add this for debugging
+      toast({
+        variant: "destructive",
+        title: "Invalid Datetime",
+        description: "Please select a future date and time.",
+      });
+      e.target.value = startTime;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +94,8 @@ export default function CreateTest() {
                 id="startTime"
                 type="datetime-local"
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={handleDateChange}
+                min={new Date().toISOString().slice(0, 16)}
                 required
               />
             </div>
@@ -85,10 +106,16 @@ export default function CreateTest() {
                   <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="10">10 minutes</SelectItem>
+                  <SelectItem value="15">15 minutes</SelectItem>
+                  <SelectItem value="20">20 minutes</SelectItem>
                   <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="45">45 minutes</SelectItem>
                   <SelectItem value="60">60 minutes</SelectItem>
                   <SelectItem value="90">90 minutes</SelectItem>
                   <SelectItem value="120">120 minutes</SelectItem>
+                  <SelectItem value="150">150 minutes</SelectItem>
+                  <SelectItem value="180">180 minutes</SelectItem>
                 </SelectContent>
               </Select>
             </div>
