@@ -56,21 +56,21 @@ export async function POST(req: Request) {
   if (eventType === "user.created") {
     const receivedData = evt.data;
 
+    const id = receivedData.id;
     const username = receivedData.username;
-
     const email = receivedData.email_addresses[0].email_address;
 
-    const validationResult = validate(signUpSchema, { username, email });
+    const validationResult = validate(signUpSchema, { id, username, email });
 
     if (!validationResult.success) {
       return new Response("Sign up validation failed", { status: 200 });
     }
 
     try {
-      const { username, email } = validationResult.data;
+      const { username, email, id } = validationResult.data;
 
       const exisitingUser = await prisma.user.findUnique({
-        where: { email },
+        where: { id },
       });
 
       if (exisitingUser) {
@@ -81,6 +81,7 @@ export async function POST(req: Request) {
 
       const newUser = await prisma.user.create({
         data: {
+          id,
           username,
           email,
         },
