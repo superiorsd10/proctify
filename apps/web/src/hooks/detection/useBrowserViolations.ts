@@ -1,7 +1,7 @@
 // apps/web/src/app/hooks/detection/useBrowserViolations.ts
 import { useCallback } from "react";
 import { useEventListener } from "./useEventListener";
-import { DetectionOptions } from "@/types/detectionTypes";
+import { DetectionOptions } from "src/types/detectionTypes";
 
 export const useBrowserViolations = (options: DetectionOptions) => {
   const handleVisibilityChange = useCallback(() => {

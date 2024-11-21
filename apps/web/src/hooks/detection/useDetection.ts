@@ -5,7 +5,7 @@ import "@tensorflow/tfjs-backend-webgl";
 import { load as cocoSSDLoad } from "@tensorflow-models/coco-ssd";
 import * as blazeface from "@tensorflow-models/blazeface";
 import Webcam from "react-webcam";
-import { DetectionOptions, Prediction } from "@/types/detectionTypes";
+import { DetectionOptions, Prediction } from "src/types/detectionTypes";
 import { useFullScreen } from "./useFullScreen";
 import { useAudioDetection } from "./useAudioDetection";
 import { useBrowserViolations } from "./useBrowserViolations";
@@ -14,7 +14,7 @@ import {
   DEFAULT_OBJECT_THRESHOLD,
   DEFAULT_NOISE_THRESHOLD,
   PERSON_ABSENCE_THRESHOLD,
-} from "@/constants/detectionConstants";
+} from "src/constants/detectionConstants";
 
 export const useDetection = (options: DetectionOptions = {}) => {
   const {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useEventListener } from "./useEventListener";
-import { BrowserViolation } from "@/types/detectionTypes";
+import { BrowserViolation } from "src/types/detectionTypes";
 
 export const useFullScreen = (
   onViolation?: (violation: BrowserViolation) => void

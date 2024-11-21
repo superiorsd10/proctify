@@ -3,7 +3,7 @@ import React, { useEffect, useCallback, useRef } from "react";
 import Webcam from "react-webcam";
 import { useDetection } from "../hooks/detection/useDetection";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
-import { BrowserViolation } from "@/types/detectionTypes";
+import { BrowserViolation } from "src/types/detectionTypes";
 
 export const ProctoringMonitor: React.FC = () => {
   const { toast } = useToast();
