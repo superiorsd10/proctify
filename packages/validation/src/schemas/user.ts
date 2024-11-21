@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const idSchema = z.string();
+
 export const usernameSchema = z
   .string()
   .min(3, "Username must be at least 3 characters")
@@ -8,6 +10,7 @@ export const usernameSchema = z
 export const emailSchema = z.string().email("Invalid email address");
 
 export const signUpSchema = z.object({
+  id: idSchema,
   username: usernameSchema,
   email: emailSchema,
 });
