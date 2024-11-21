@@ -27,13 +27,12 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <header>
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
+          <header className="w-full px-4 py-3">
+            <div className="flex justify-end">
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
           </header>
           <main>
             {children}
