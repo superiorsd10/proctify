@@ -8,7 +8,9 @@ export default function Home() {
         <Link href="/create-test">
           <Button variant="default">Create Test</Button>
         </Link>
-        <Button variant="outline">Join Test</Button>
+        <Link href="/join-test">
+          <Button variant="outline">Join Test</Button>
+        </Link>
       </div>
     </div>
   );
