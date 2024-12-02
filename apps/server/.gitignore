@@ -1,0 +1,20 @@
+# Node.js
+node_modules
+
+# TypeScript
+dist
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+
+# Miscellaneous
+*.DS_Store
+*.tmp
+*.swp
+
+# Visual Studio Code
+.vscode/
