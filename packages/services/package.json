@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@repo/utils": "*",
+    "kafkajs": "^2.2.4",
     "redis": "^4.7.0"
   }
 }
