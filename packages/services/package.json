@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@repo/utils": "*",
+    "aws-sdk": "^2.1692.0",
     "kafkajs": "^2.2.4",
     "redis": "^4.7.0"
   }
