@@ -23,6 +23,8 @@
   "dependencies": {
     "@repo/utils": "*",
     "@types/express": "^5.0.0",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "rate-limit-redis": "^4.2.0"
   }
 }
