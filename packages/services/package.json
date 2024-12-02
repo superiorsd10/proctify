@@ -21,6 +21,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@repo/utils": "*"
+    "@repo/utils": "*",
+    "redis": "^4.7.0"
   }
 }
