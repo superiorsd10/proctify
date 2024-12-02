@@ -8,7 +8,12 @@ export class RedisService {
     this.client = createClient({
       url: process.env.REDIS_URL || "redis://localhost:6379",
     });
-    this.client.connect();
+
+    this.client.on("error", (err) => console.error("Redis Client Error", err));
+
+    this.client.connect().catch((err) => {
+      console.error("Failed to connect to Redis:", err);
+    });
   }
 
   static getInstance(): RedisService {
@@ -24,5 +29,9 @@ export class RedisService {
 
   async get(key: string): Promise<string | null> {
     return await this.client.get(key);
+  }
+
+  getClient(): RedisClientType {
+    return this.client;
   }
 }
