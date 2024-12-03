@@ -1,7 +1,11 @@
 import express from "express";
 import { TestController } from "../controllers/TestController";
 import { validationMiddleware } from "@repo/middlewares";
-import { createTestSchema, joinTestSchema } from "@repo/validation";
+import {
+  createTestSchema,
+  joinTestSchema,
+  updateLogsSchema,
+} from "@repo/validation";
 
 const router = express.Router();
 const testController = new TestController();
@@ -19,5 +23,11 @@ router.post(
 );
 
 router.get("/monitor", testController.fetchTestLogs.bind(testController));
+
+router.post(
+  "/update-logs",
+  validationMiddleware(updateLogsSchema),
+  testController.updateLog.bind(testController)
+);
 
 export default router;
