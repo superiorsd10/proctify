@@ -7,9 +7,11 @@ import { CountdownTimer } from "./countdown-timer";
 export function ProctoringContent({
   url,
   startTime,
+  code,
 }: {
   url: string;
   startTime: string;
+  code: string;
 }) {
   const [proctoringEnabled, setProctoringEnabled] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -40,7 +42,7 @@ export function ProctoringContent({
   return (
     <div className="relative">
       <div className="absolute top-0 left-0 z-10">
-        <ProctoringMonitor url={url} />
+        <ProctoringMonitor url={url} code={code} />
       </div>
     </div>
   );
