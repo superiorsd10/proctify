@@ -62,7 +62,7 @@ export default function JoinTest() {
         });
 
         router.push(
-          `/proctor?url=${encodeURIComponent(data.link)}&startTime=${data.startTime}`
+          `/proctor?url=${encodeURIComponent(data.link)}&startTime=${data.startTime}&code=${code}`
         );
       } else {
         const errorData = await response.json();
