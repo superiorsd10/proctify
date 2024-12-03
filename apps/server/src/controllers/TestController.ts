@@ -87,6 +87,7 @@ export class TestController {
         success: true,
         message: "User successfully joined the test",
         data: log,
+        link: test.link,
       });
     } catch (error) {
       next(error);
