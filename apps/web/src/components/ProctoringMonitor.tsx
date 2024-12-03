@@ -5,7 +5,7 @@ import { useDetection } from "../hooks/detection/useDetection";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
 import { BrowserViolation } from "src/types/detectionTypes";
 
-export const ProctoringMonitor: React.FC = () => {
+export function ProctoringMonitor({ url }: { url: string }) {
   const { toast } = useToast();
 
   const handleBrowserViolation = useCallback(
@@ -88,23 +88,26 @@ export const ProctoringMonitor: React.FC = () => {
   if (isLoading) return <div>Loading Detection Model...</div>;
 
   return (
-    <div className="relative">
-      <Webcam
-        ref={webcamRef}
-        className="rounded-md w-full"
-        audio={false}
-        mirrored={true}
-        videoConstraints={{
-          width: 1280,
-          height: 720,
-          facingMode: "user",
-        }}
-      />
-      <canvas
+    <div className="relative w-full h-screen">
+      <div className="absolute top-4 left-4 z-50">
+        <Webcam
+          ref={webcamRef}
+          className="w-48 h-36 rounded-md border border-gray-300"
+          audio={false}
+          mirrored={true}
+          videoConstraints={{
+            width: 640,
+            height: 480,
+            facingMode: "user",
+          }}
+        />
+      </div>
+      <iframe
         ref={canvasRef}
-        className="absolute top-0 left-0 z-50 w-full"
-        style={{ pointerEvents: "none" }}
+        src={url}
+        className="w-full h-full border-none"
+        title="Test"
       />
     </div>
   );
-};
+}
