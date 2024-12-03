@@ -1,10 +1,36 @@
-import { ProctoringMonitor } from "@/components/ProctoringMonitor";
+"use client";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { ProctoringMonitor } from "src/components/ProctoringMonitor";
 
 export default function ProctoringPage() {
+  const router = useRouter();
+  const { url } = router.query;
+  const [proctoringEnabled, setProctoringEnabled] = useState(false);
+
+  useEffect(() => {
+    if (url) {
+      setProctoringEnabled(true);
+    }
+  }, [url]);
+
+  if (!url) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Proctoring Session</h1>
-      <ProctoringMonitor />
+    <div>
+      <h1>Proctoring Test</h1>
+      <div style={{ display: "flex" }}>
+        <iframe
+          src={url as string}
+          style={{ flex: 1, height: "100vh", border: "none" }}
+          title="Test"
+        />
+        <div style={{ position: "absolute", top: 0, left: 0, zIndex: 100 }}>
+          {proctoringEnabled && <ProctoringMonitor />}
+        </div>
+      </div>
     </div>
   );
 }
