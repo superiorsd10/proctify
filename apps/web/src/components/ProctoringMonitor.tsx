@@ -4,31 +4,52 @@ import Webcam from "react-webcam";
 import { useDetection } from "../hooks/detection/useDetection";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
 import { BrowserViolation } from "src/types/detectionTypes";
+import { SERVER_BASE_URL } from "src/constants/configurationConstants";
+import { useAuth } from "@clerk/nextjs";
 
-export function ProctoringMonitor({ url }: { url: string }) {
+export function ProctoringMonitor({
+  url,
+  code,
+}: {
+  url: string;
+  code: string;
+}) {
   const { toast } = useToast();
+
+  const violationCountsRef = useRef<Record<string, number>>({});
+
+  const { userId } = useAuth();
 
   const handleBrowserViolation = useCallback(
     (violation: BrowserViolation) => {
       let violationMessage = "";
+      let violationType = "";
 
       switch (violation.type) {
         case "fullscreen":
           violationMessage = "Attempted to exit full-screen mode";
+          violationType = "windowChangeViolations";
           break;
         case "rightclick":
           violationMessage = "Right-click detected";
+          violationType = "rightClickViolations";
           break;
         case "copypaste":
           violationMessage = "Copy-paste attempt detected";
+          violationType = "keypressViolations";
           break;
         case "tab":
           violationMessage = "Tab switching attempt detected";
+          violationType = "windowChangeViolations";
           break;
         case "window":
           violationMessage = "Window switching attempt detected";
+          violationType = "windowChangeViolations";
           break;
       }
+
+      violationCountsRef.current[violationType] =
+        (violationCountsRef.current[violationType] || 0) + 1;
 
       toast({
         variant: "destructive",
@@ -57,10 +78,15 @@ export function ProctoringMonitor({ url }: { url: string }) {
   }, [enterFullscreen]);
 
   // Keep track of previous violations
-  const previousViolationsRef = useRef<string[]>([]);
+  const previousViolationsRef = useRef<{ type: string; message: string }[]>([]);
 
   const processDetection = useCallback(async () => {
     const currentViolations = await runDetection();
+
+    currentViolations.forEach((violation) => {
+      violationCountsRef.current[violation.type] =
+        (violationCountsRef.current[violation.type] || 0) + 1;
+    });
 
     // Only show toasts for new violations that weren't present in the previous check
     const newViolations = currentViolations.filter(
@@ -72,7 +98,7 @@ export function ProctoringMonitor({ url }: { url: string }) {
       toast({
         variant: "destructive",
         title: "Proctoring Violation",
-        description: violation,
+        description: violation.message,
       });
     });
 
@@ -80,10 +106,46 @@ export function ProctoringMonitor({ url }: { url: string }) {
     previousViolationsRef.current = currentViolations;
   }, [runDetection, toast]);
 
+  const reportViolations = useCallback(async () => {
+    const violationsArray = Object.entries(violationCountsRef.current).map(
+      ([type, count]) => ({ type, count })
+    );
+
+    if (violationsArray.length > 0) {
+      const violationData = {
+        userId,
+        testId: code,
+        violations: violationsArray,
+      };
+
+      try {
+        await fetch(`${SERVER_BASE_URL}/test/update-log`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(violationData),
+        });
+        violationCountsRef.current = {};
+      } catch (error) {
+        console.error("Error reporting violations", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Error reporting violations",
+        });
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const detectionInterval = setInterval(processDetection, 3000);
-    return () => clearInterval(detectionInterval);
-  }, [processDetection]);
+    const reportInterval = setInterval(reportViolations, 10000);
+    return () => {
+      clearInterval(detectionInterval);
+      clearInterval(reportInterval);
+    };
+  }, [processDetection, reportViolations]);
 
   if (isLoading) return <div>Loading Detection Model...</div>;
 
