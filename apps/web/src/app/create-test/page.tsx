@@ -40,7 +40,7 @@ export default function CreateTest() {
     if (selectedTime > currentTime) {
       setStartTime(e.target.value);
     } else {
-      console.log("Toast should trigger"); // Add this for debugging
+      console.log("Toast should trigger");
       toast({
         variant: "destructive",
         title: "Invalid Datetime",
@@ -57,6 +57,11 @@ export default function CreateTest() {
     const { userId } = useAuth();
 
     if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "User Not Authenticated",
+        description: "You must be logged in to join a test.",
+      });
       return;
     }
 
