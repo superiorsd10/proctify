@@ -61,9 +61,12 @@ export class TestController {
       });
 
       if (existingLog) {
-        res.status(HttpStatusCode.BAD_REQUEST).json({
-          success: false,
-          message: "User has already joined the test",
+        res.status(HttpStatusCode.CREATED).json({
+          success: true,
+          message: "User successfully joined the test",
+          data: existingLog,
+          link: test.link,
+          startTime: test.startTime,
         });
         return;
       }
@@ -88,6 +91,7 @@ export class TestController {
         message: "User successfully joined the test",
         data: log,
         link: test.link,
+        startTime: test.startTime,
       });
     } catch (error) {
       next(error);
