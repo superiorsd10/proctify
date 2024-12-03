@@ -24,7 +24,9 @@ export const useDetection = (options: DetectionOptions = {}) => {
   } = options;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [violations, setViolations] = useState<string[]>([]);
+  const [violations, setViolations] = useState<
+    { type: string; message: string }[]
+  >([]);
   const [noiseLevel, setNoiseLevel] = useState(0);
   const [personPresent, setPersonPresent] = useState(true);
 
@@ -80,7 +82,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
   );
 
   const runDetection = useCallback(async () => {
-    const currentViolations: string[] = [];
+    const currentViolations: { type: string; message: string }[] = [];
 
     // Object Detection
     if (modelRef.current && webcamRef.current) {
@@ -102,9 +104,10 @@ export const useDetection = (options: DetectionOptions = {}) => {
 
           // Check for multiple faces
           if (faces && faces.length > 1) {
-            currentViolations.push(
-              `Multiple faces detected: ${faces.length} faces in the frame`
-            );
+            currentViolations.push({
+              type: "multipleFaceViolations",
+              message: `Multiple faces detected: ${faces.length} faces in the frame`,
+            });
           }
         }
 
@@ -112,18 +115,20 @@ export const useDetection = (options: DetectionOptions = {}) => {
         predictions.forEach((prediction: Prediction) => {
           const detectedClass = prediction.class.toLowerCase();
           if (prohibitedObjects.some((obj) => detectedClass.includes(obj))) {
-            currentViolations.push(
-              `Prohibited object detected: ${prediction.class} (${(prediction.score * 100).toFixed(2)}%)`
-            );
+            currentViolations.push({
+              type: "prohibitedObjectViolations",
+              message: `Prohibited object detected: ${prediction.class} (${(prediction.score * 100).toFixed(2)}%)`,
+            });
           }
         });
 
         // Check for person presence
         const personAbsent = checkPersonPresence(predictions);
         if (personAbsent) {
-          currentViolations.push(
-            `No person detected in frame for more than ${PERSON_ABSENCE_THRESHOLD / 1000} seconds`
-          );
+          currentViolations.push({
+            type: "noFaceViolations",
+            message: `No person detected in frame for more than ${PERSON_ABSENCE_THRESHOLD / 1000} seconds`,
+          });
         }
       }
     }
@@ -135,9 +140,10 @@ export const useDetection = (options: DetectionOptions = {}) => {
     console.log("Current Noise Level:", currentNoiseLevel);
 
     if (currentNoiseLevel > noiseThreshold) {
-      currentViolations.push(
-        `Noise level too high: ${currentNoiseLevel}dB (threshold: ${noiseThreshold}dB)`
-      );
+      currentViolations.push({
+        type: "audioViolations",
+        message: `Noise level too high: ${currentNoiseLevel}dB (threshold: ${noiseThreshold}dB)`,
+      });
     }
 
     setViolations(currentViolations);
