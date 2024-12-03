@@ -28,7 +28,7 @@ model Test {
   link          String
   startTime     DateTime
   duration      Int
-  code          String
+  code          String   @unique
   createdByUser User     @relation("UserTests", fields: [createdBy], references: [id])
   logs          Log[]
 }
