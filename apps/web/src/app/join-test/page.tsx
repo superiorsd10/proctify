@@ -61,7 +61,7 @@ export default function JoinTest() {
           description: data.message || "You have successfully joined the test.",
         });
 
-        router.push("/");
+        router.push(`/proctor?url=${encodeURIComponent(data.link)}`);
       } else {
         const errorData = await response.json();
 
