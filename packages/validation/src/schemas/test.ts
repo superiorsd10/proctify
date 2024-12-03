@@ -14,3 +14,19 @@ export const joinTestSchema = z.object({
   testId: z.string().min(1, "Test ID is required"),
   userId: z.string().min(1, "User ID is required"),
 });
+
+export const updateLogsSchema = z.object({
+  testId: z.string().min(1, "testId is required"),
+  userId: z.string().min(1, "userId is required"),
+  violations: z
+    .array(
+      z.tuple([
+        z.string().min(1, "Violation type is required"),
+        z
+          .number()
+          .int()
+          .nonnegative("Number of violations must be non-negative"),
+      ])
+    )
+    .nonempty("Violations array cannot be empty"),
+});
