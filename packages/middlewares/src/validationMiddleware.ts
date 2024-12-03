@@ -13,7 +13,7 @@ export const validationMiddleware = (schema: ZodSchema) => {
           error: error.errors,
         });
         res.status(HttpStatusCode.BAD_REQUEST).json({
-          error: "Invalid request data",
+          message: "Invalid request data",
           details: error.errors.map((e) => ({
             field: e.path.join("."),
             message: e.message,
@@ -23,7 +23,7 @@ export const validationMiddleware = (schema: ZodSchema) => {
       } else {
         console.error("Unexpected validation error", { error });
         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-          error: "An unexpected error occurred",
+          message: "An unexpected error occurred",
           success: false,
         });
       }
