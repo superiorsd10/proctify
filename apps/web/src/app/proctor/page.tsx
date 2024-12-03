@@ -1,36 +1,19 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { ProctoringMonitor } from "src/components/ProctoringMonitor";
+import { ProctoringContent } from "./proctoring-content";
 
-export default function ProctoringPage() {
-  const router = useRouter();
-  const { url } = router.query;
-  const [proctoringEnabled, setProctoringEnabled] = useState(false);
+export default function ProctoringPage({
+  searchParams,
+}: {
+  searchParams: { url?: string; startTime?: string };
+}) {
+  const { url, startTime } = searchParams;
 
-  useEffect(() => {
-    if (url) {
-      setProctoringEnabled(true);
-    }
-  }, [url]);
-
-  if (!url) {
-    return <div>Loading...</div>;
+  if (!url || !startTime) {
+    return <div>Missing URL or start time</div>;
   }
 
   return (
-    <div>
-      <h1>Proctoring Test</h1>
-      <div style={{ display: "flex" }}>
-        <iframe
-          src={url as string}
-          style={{ flex: 1, height: "100vh", border: "none" }}
-          title="Test"
-        />
-        <div style={{ position: "absolute", top: 0, left: 0, zIndex: 100 }}>
-          {proctoringEnabled && <ProctoringMonitor />}
-        </div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <ProctoringContent url={url} startTime={startTime} />
     </div>
   );
 }
