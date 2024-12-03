@@ -23,11 +23,11 @@ export default function JoinTest() {
 
   const { toast } = useToast();
 
+  const { userId } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ code });
-
-    const { userId } = useAuth();
 
     if (!userId) {
       toast({
@@ -61,7 +61,9 @@ export default function JoinTest() {
           description: data.message || "You have successfully joined the test.",
         });
 
-        router.push(`/proctor?url=${encodeURIComponent(data.link)}`);
+        router.push(
+          `/proctor?url=${encodeURIComponent(data.link)}&startTime=${data.startTime}`
+        );
       } else {
         const errorData = await response.json();
 

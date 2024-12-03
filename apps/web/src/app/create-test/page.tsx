@@ -33,6 +33,8 @@ export default function CreateTest() {
 
   const { toast } = useToast();
 
+  const { userId } = useAuth();
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedTime = new Date(e.target.value);
     const currentTime = new Date();
@@ -53,8 +55,6 @@ export default function CreateTest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ title, link, startTime, duration });
-
-    const { userId } = useAuth();
 
     if (!userId) {
       toast({
