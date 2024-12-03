@@ -74,7 +74,7 @@ export default function CreateTest() {
     };
 
     try {
-      const response = await fetch("/api/tests", {
+      const response = await fetch(`${SERVER_BASE_URL}/test`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
