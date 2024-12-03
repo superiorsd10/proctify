@@ -22,20 +22,19 @@ model User {
 }
 
 model Test {
-  id            Int      @id @default(autoincrement())
   title         String
   createdBy     String
   link          String
   startTime     DateTime
   duration      Int
-  code          String   @unique
+  code          String   @id
   createdByUser User     @relation("UserTests", fields: [createdBy], references: [id])
   logs          Log[]
 }
 
 model Log {
   id                         Int    @id @default(autoincrement())
-  testId                     Int
+  testId                     String
   userId                     String
   audioViolations            Int    @default(0)
   noFaceViolations           Int    @default(0)
@@ -45,6 +44,6 @@ model Log {
   windowChangeViolations     Int    @default(0)
   prohibitedObjectViolations Int    @default(0)
   ufmScore                   Int    @default(0)
-  test                       Test   @relation(fields: [testId], references: [id])
+  test                       Test   @relation(fields: [testId], references: [code])
   user                       User   @relation("UserLogs", fields: [userId], references: [id])
 }
