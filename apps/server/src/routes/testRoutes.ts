@@ -25,7 +25,7 @@ router.post(
 router.get("/monitor", testController.fetchTestLogs.bind(testController));
 
 router.post(
-  "/update-logs",
+  "/update-log",
   validationMiddleware(updateLogsSchema),
   testController.updateLog.bind(testController)
 );
