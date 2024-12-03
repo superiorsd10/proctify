@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { LogTable } from "./log-table";
 import { PaginationControls } from "./pagination";
 import { SERVER_BASE_URL } from "src/constants/configurationConstants";
-import { useAuth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 async function getTestLogs(code: string, page: number, userId: string) {
   const res = await fetch(
@@ -23,7 +23,7 @@ export default async function MonitorPage({
   params: { code: string };
   searchParams: { page?: string };
 }) {
-  const { userId } = useAuth();
+  const { userId } = await auth();
   const page = Number(searchParams.page) || 1;
   const {
     data: logs,
