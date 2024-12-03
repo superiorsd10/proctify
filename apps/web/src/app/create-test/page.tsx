@@ -90,7 +90,10 @@ export default function CreateTest() {
           title: "Test Created",
           description: data.message || "The test was created successfully!",
         });
-        router.push("/");
+
+        const testCode = data.data.code as string;
+
+        router.push(`/monitor/${testCode}`);
       } else {
         const errorData = await response.json();
 
