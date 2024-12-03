@@ -43,4 +43,51 @@ export class TestController {
       next(error);
     }
   }
+
+  async joinTest(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { testId, userId } = req.body;
+
+      const test = await prisma.test.findUnique({ where: { code: testId } });
+      if (!test) {
+        return res
+          .status(HttpStatusCode.NOT_FOUND)
+          .json({ success: false, message: "Test not found" });
+      }
+
+      const existingLog = await prisma.log.findFirst({
+        where: { testId, userId },
+      });
+
+      if (existingLog) {
+        return res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "User has already joined the test",
+        });
+      }
+
+      const log = await prisma.log.create({
+        data: {
+          testId,
+          userId,
+          audioViolations: 0,
+          noFaceViolations: 0,
+          multipleFaceViolations: 0,
+          keypressViolations: 0,
+          rightClickViolations: 0,
+          windowChangeViolations: 0,
+          prohibitedObjectViolations: 0,
+          ufmScore: 0,
+        },
+      });
+
+      res.status(HttpStatusCode.CREATED).json({
+        success: true,
+        message: "User successfully joined the test",
+        log,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
