@@ -136,19 +136,24 @@ export class TestController {
       const logs = await prisma.log.findMany({
         where: {
           testId: testId as string,
-          userId: userId as string,
         },
         orderBy: {
           ufmScore: "desc",
         },
         skip,
         take: 10,
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
       });
 
       const totalLogs = await prisma.log.count({
         where: {
           testId: testId as string,
-          userId: userId as string,
         },
       });
 
@@ -157,7 +162,10 @@ export class TestController {
       res.status(HttpStatusCode.SUCCESS).json({
         success: true,
         message: "Fetched test logs successfully",
-        data: logs,
+        data: logs.map((log) => ({
+          ...log,
+          username: log.user?.username, // Add the username to the log object
+        })),
         title: test.title,
         pagination: {
           currentPage: pageNumber,
@@ -189,9 +197,9 @@ export class TestController {
       const updatedLogData: Partial<typeof log> = { ...log };
       let updatedUfmScore = log.ufmScore;
 
-      for (const [violationType, count] of violations) {
-        if (violationType in updatedLogData) {
-          updatedLogData[violationType as keyof typeof log] += count;
+      for (const violation of violations) {
+        if (violation.type in updatedLogData) {
+          updatedLogData[violation.type as keyof typeof log] += violation.count;
         }
 
         const violationWeights: Record<string, number> = {
@@ -204,8 +212,8 @@ export class TestController {
           prohibitedObjectViolations: 5,
         };
 
-        if (violationType in violationWeights) {
-          updatedUfmScore += count * violationWeights[violationType];
+        if (violation.type in violationWeights) {
+          updatedUfmScore += violation.count * violationWeights[violation.type];
         }
       }
 
