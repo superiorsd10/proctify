@@ -8,7 +8,7 @@ import {
 } from "@repo/ui/components/ui/table";
 
 type Log = {
-  id: number;
+  username: string;
   audioViolations: number;
   noFaceViolations: number;
   multipleFaceViolations: number;
@@ -24,7 +24,7 @@ export function LogTable({ logs }: { logs: Log[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID</TableHead>
+          <TableHead>Username</TableHead>
           <TableHead>Audio</TableHead>
           <TableHead>No Face</TableHead>
           <TableHead>Multiple Faces</TableHead>
@@ -37,8 +37,8 @@ export function LogTable({ logs }: { logs: Log[] }) {
       </TableHeader>
       <TableBody>
         {logs.map((log) => (
-          <TableRow key={log.id}>
-            <TableCell>{log.id}</TableCell>
+          <TableRow key={log.username}>
+            <TableCell>{log.username}</TableCell>
             <TableCell>{log.audioViolations}</TableCell>
             <TableCell>{log.noFaceViolations}</TableCell>
             <TableCell>{log.multipleFaceViolations}</TableCell>
