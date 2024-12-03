@@ -153,6 +153,7 @@ export class TestController {
         success: true,
         message: "Fetched test logs successfully",
         data: logs,
+        title: test.title,
         pagination: {
           currentPage: pageNumber,
           totalPages,
