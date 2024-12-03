@@ -20,13 +20,13 @@ export const updateLogsSchema = z.object({
   userId: z.string().min(1, "userId is required"),
   violations: z
     .array(
-      z.tuple([
-        z.string().min(1, "Violation type is required"),
-        z
+      z.object({
+        type: z.string().min(1, "Violation type is required"),
+        count: z
           .number()
           .int()
           .nonnegative("Number of violations must be non-negative"),
-      ])
+      })
     )
     .nonempty("Violations array cannot be empty"),
 });
