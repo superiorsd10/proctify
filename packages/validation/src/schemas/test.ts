@@ -9,3 +9,8 @@ export const createTestSchema = z.object({
     .refine((date) => !isNaN(Date.parse(date)), "Invalid start time format"),
   duration: z.number().positive("Duration must be a positive number"),
 });
+
+export const joinTestSchema = z.object({
+  testId: z.string().min(1, "Test ID is required"),
+  userId: z.string().min(1, "User ID is required"),
+});
