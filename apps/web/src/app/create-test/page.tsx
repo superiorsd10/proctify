@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { useToast } from "@repo/ui/components/hooks/use-toast";
+import { useAuth } from "@clerk/nextjs";
+import { SERVER_BASE_URL } from "src/constants/configurationConstants";
 
 export default function CreateTest() {
   const router = useRouter();
@@ -50,10 +52,57 @@ export default function CreateTest() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    //TODO: send the data to your backend
     console.log({ title, link, startTime, duration });
-    //TODO: Navigate to monitor test page after submission
-    router.push("/");
+
+    const { userId } = useAuth();
+
+    if (!userId) {
+      return;
+    }
+
+    const testData = {
+      title,
+      createdBy: userId,
+      link,
+      startTime,
+      duration: Number(duration),
+    };
+
+    try {
+      const response = await fetch("/api/tests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(testData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        toast({
+          variant: "success",
+          title: "Test Created",
+          description: data.message || "The test was created successfully!",
+        });
+        router.push("/");
+      } else {
+        const errorData = await response.json();
+
+        toast({
+          variant: "destructive",
+          title: "Failed to Create Test",
+          description:
+            errorData.message || "There was an error creating the test.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again later.",
+      });
+    }
   };
 
   return (
