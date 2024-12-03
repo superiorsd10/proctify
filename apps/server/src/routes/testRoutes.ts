@@ -18,4 +18,6 @@ router.post(
   testController.joinTest.bind(testController)
 );
 
+router.get("/monitor", testController.fetchTestLogs.bind(testController));
+
 export default router;
