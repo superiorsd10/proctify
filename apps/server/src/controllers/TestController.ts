@@ -36,7 +36,7 @@ export class TestController {
 
       res.status(HttpStatusCode.CREATED).json({
         message: "Test created successfully",
-        test: newTest,
+        data: newTest,
         success: true,
       });
     } catch (error) {
@@ -86,7 +86,78 @@ export class TestController {
       res.status(HttpStatusCode.CREATED).json({
         success: true,
         message: "User successfully joined the test",
-        log,
+        data: log,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async fetchTestLogs(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { testId, userId, page = 1 } = req.query;
+
+      if (!testId || !userId) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "testId and userId are required",
+        });
+        return;
+      }
+
+      const test = await prisma.test.findUnique({
+        where: { code: testId as string },
+      });
+
+      if (!test) {
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          success: false,
+          message: "Test not found",
+        });
+        return;
+      }
+
+      if (test.createdBy !== userId) {
+        res.status(HttpStatusCode.FORBIDDEN).json({
+          success: false,
+          message: "You are not authorized to view these logs",
+        });
+        return;
+      }
+
+      const pageNumber = parseInt(page as string, 10);
+      const skip = (pageNumber - 1) * 10;
+
+      const logs = await prisma.log.findMany({
+        where: {
+          testId: testId as string,
+          userId: userId as string,
+        },
+        orderBy: {
+          ufmScore: "desc",
+        },
+        skip,
+        take: 10,
+      });
+
+      const totalLogs = await prisma.log.count({
+        where: {
+          testId: testId as string,
+          userId: userId as string,
+        },
+      });
+
+      const totalPages = Math.ceil(totalLogs / 10);
+
+      res.status(HttpStatusCode.SUCCESS).json({
+        success: true,
+        message: "Fetched test logs successfully",
+        data: logs,
+        pagination: {
+          currentPage: pageNumber,
+          totalPages,
+          totalLogs,
+        },
       });
     } catch (error) {
       next(error);
