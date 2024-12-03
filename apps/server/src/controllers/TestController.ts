@@ -169,4 +169,60 @@ export class TestController {
       next(error);
     }
   }
+
+  async updateLog(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { testId, userId, violations } = req.body;
+
+      const log = await prisma.log.findFirst({
+        where: { testId, userId },
+      });
+
+      if (!log) {
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          success: false,
+          message: "Log entry not found",
+        });
+        return;
+      }
+
+      const updatedLogData: Partial<typeof log> = { ...log };
+      let updatedUfmScore = log.ufmScore;
+
+      for (const [violationType, count] of violations) {
+        if (violationType in updatedLogData) {
+          updatedLogData[violationType as keyof typeof log] += count;
+        }
+
+        const violationWeights: Record<string, number> = {
+          audioViolations: 1,
+          noFaceViolations: 2,
+          multipleFaceViolations: 3,
+          keypressViolations: 2,
+          rightClickViolations: 2,
+          windowChangeViolations: 2,
+          prohibitedObjectViolations: 5,
+        };
+
+        if (violationType in violationWeights) {
+          updatedUfmScore += count * violationWeights[violationType];
+        }
+      }
+
+      updatedLogData.ufmScore = updatedUfmScore;
+
+      const updatedLog = await prisma.log.update({
+        where: { id: log.id },
+        data: updatedLogData,
+      });
+
+      res.status(HttpStatusCode.SUCCESS).json({
+        success: true,
+        message: "Log updated successfully",
+        data: updatedLog,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
