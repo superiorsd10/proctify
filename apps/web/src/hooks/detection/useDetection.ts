@@ -29,7 +29,7 @@ export const useDetection = (options: DetectionOptions = {}) => {
   const [personPresent, setPersonPresent] = useState(true);
 
   const webcamRef = useRef<Webcam>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLIFrameElement>(null);
   const modelRef = useRef<any>(null);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const personAbsentStartTime = useRef<number | null>(null);
