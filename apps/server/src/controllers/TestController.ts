@@ -50,9 +50,10 @@ export class TestController {
 
       const test = await prisma.test.findUnique({ where: { code: testId } });
       if (!test) {
-        return res
+        res
           .status(HttpStatusCode.NOT_FOUND)
           .json({ success: false, message: "Test not found" });
+        return;
       }
 
       const existingLog = await prisma.log.findFirst({
@@ -60,10 +61,11 @@ export class TestController {
       });
 
       if (existingLog) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({
+        res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
           message: "User has already joined the test",
         });
+        return;
       }
 
       const log = await prisma.log.create({
