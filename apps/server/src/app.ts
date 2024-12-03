@@ -7,6 +7,7 @@ import {
   errorHandlerMiddleware,
 } from "@repo/middlewares";
 import { RedisService } from "@repo/services";
+import testRoutes from "./routes/testRoutes";
 
 export default function createApp(): Express {
   const app = express();
@@ -21,7 +22,7 @@ export default function createApp(): Express {
 
   app.use(rateLimiterMiddleware);
 
-  // routes
+  app.use("/test", testRoutes);
 
   app.use(errorHandlerMiddleware);
 
