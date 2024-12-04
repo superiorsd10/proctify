@@ -113,7 +113,7 @@ export function ProctoringContestMonitor({
       };
 
       try {
-        await fetch(`${SERVER_BASE_URL}/test/update-log`, {
+        await fetch(`${SERVER_BASE_URL}/contest/update-log`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
