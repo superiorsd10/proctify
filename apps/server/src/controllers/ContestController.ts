@@ -51,4 +51,59 @@ export class ContestController {
       next(error);
     }
   }
+
+  async getContest(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { contestId } = req.params;
+
+      if (!contestId) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          success: false,
+          message: "Contest ID is required.",
+        });
+        return;
+      }
+
+      const contest = await prisma.contest.findUnique({
+        where: { id: contestId },
+        include: {
+          problems: true, // Include associated problems
+        },
+      });
+
+      if (!contest) {
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          success: false,
+          message: "Contest not found.",
+        });
+        return;
+      }
+
+      const response = {
+        id: contest.id,
+        title: contest.title,
+        startTime: contest.startTime.toISOString(),
+        duration: contest.duration,
+        userId: contest.userId,
+        problems: contest.problems.map((problem) => ({
+          id: problem.id,
+          contestId: problem.contestId,
+          descriptionUrl: problem.descriptionUrl,
+          inputFileUrl: problem.inputFileUrl,
+          outputFileUrl: problem.outputFileUrl,
+          sampleInput: problem.sampleInput,
+          sampleOutput: problem.sampleOutput,
+          points: problem.points,
+        })),
+      };
+
+      res.status(HttpStatusCode.SUCCESS).json({
+        success: true,
+        data: response,
+      });
+    } catch (error) {
+      console.error("Error fetching contest:", error);
+      next(error);
+    }
+  }
 }
