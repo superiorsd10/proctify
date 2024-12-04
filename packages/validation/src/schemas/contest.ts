@@ -16,6 +16,7 @@ export const createContestSchema = z.object({
         outputFileUrl: z.string().url("Invalid link format"),
         sampleInput: z.string().min(1, "Sample input is required"),
         sampleOutput: z.string().min(1, "Sample output is required"),
+        points: z.number().positive("Duration must be a positive number"),
       })
     )
     .nonempty(),
