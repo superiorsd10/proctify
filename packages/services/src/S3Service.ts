@@ -31,6 +31,27 @@ export class S3Service {
     });
   }
 
+  async uploadWithPresignedUrl(
+    bucket: string,
+    key: string,
+    content: string,
+    expiresIn = 3600
+  ): Promise<string> {
+    const presignedUrl = await this.generatePresignedUrl(
+      bucket,
+      key,
+      expiresIn
+    );
+
+    await fetch(presignedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": "text/plain" },
+      body: content,
+    });
+
+    return `s3://${bucket}/${key}`;
+  }
+
   async getFile(bucket: string, key: string): Promise<S3.GetObjectOutput> {
     return this.s3.getObject({ Bucket: bucket, Key: key }).promise();
   }
