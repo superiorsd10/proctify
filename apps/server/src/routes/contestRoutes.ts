@@ -4,6 +4,7 @@ import { validationMiddleware } from "@repo/middlewares";
 import {
   createContestSchema,
   joinContestSchema,
+  runCodeSchema,
   updateContestLogsSchema,
 } from "@repo/validation";
 
@@ -33,6 +34,12 @@ router.post(
   "/update-log",
   validationMiddleware(updateContestLogsSchema),
   contestController.updateContestLog.bind(contestController)
+);
+
+router.post(
+  "/run-code",
+  validationMiddleware(runCodeSchema),
+  contestController.runCode.bind(contestController)
 );
 
 export default router;
