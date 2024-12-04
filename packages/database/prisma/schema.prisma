@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id       String @id
+  id       String    @id
   username String
-  email    String @unique
-  tests    Test[] @relation("UserTests")
-  logs     Log[]  @relation("UserLogs")
+  email    String    @unique
+  tests    Test[]    @relation("UserTests")
+  logs     Log[]     @relation("UserLogs")
+  Contest  Contest[]
 }
 
 model Test {
@@ -46,4 +47,26 @@ model Log {
   ufmScore                   Int    @default(0)
   test                       Test   @relation(fields: [testId], references: [code])
   user                       User   @relation("UserLogs", fields: [userId], references: [id])
+}
+
+model Contest {
+  id        String    @id
+  title     String
+  startTime DateTime
+  duration  Int
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  problems  Problem[]
+}
+
+model Problem {
+  id             Int     @id @default(autoincrement())
+  contestId      String
+  contest        Contest @relation(fields: [contestId], references: [id])
+  descriptionUrl String
+  inputFileUrl   String
+  outputFileUrl  String
+  sampleInput    String
+  sampleOutput   String
+  points         Int
 }
