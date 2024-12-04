@@ -25,6 +25,7 @@ export default function CreateContest() {
         outputFile: null,
         sampleInput: "",
         sampleOutput: "",
+        points: 0,
       },
     ]);
   };
@@ -83,7 +84,7 @@ export default function CreateContest() {
     };
 
     console.log("Contest data:", contestData);
-    // send the contestData to your backend
+    // Here you would send the contestData to your backend
   };
 
   return (
