@@ -21,3 +21,24 @@ export const createContestSchema = z.object({
     )
     .nonempty(),
 });
+
+export const joinContestSchema = z.object({
+  contestId: z.string().min(1, "Contest ID is required"),
+  userId: z.string().min(1, "User ID is required"),
+});
+
+export const updateContestLogsSchema = z.object({
+  contestId: z.string().min(1, "contestId is required"),
+  userId: z.string().min(1, "userId is required"),
+  violations: z
+    .array(
+      z.object({
+        type: z.string().min(1, "Violation type is required"),
+        count: z
+          .number()
+          .int()
+          .nonnegative("Number of violations must be non-negative"),
+      })
+    )
+    .nonempty("Violations array cannot be empty"),
+});
