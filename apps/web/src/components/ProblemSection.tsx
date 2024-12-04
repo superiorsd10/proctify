@@ -51,6 +51,7 @@ export function ProblemSection({ onChange }: ProblemSectionProps) {
         <Input
           id="input-file"
           type="file"
+          accept=".txt"
           onChange={(e) =>
             updateProblem("inputFile", e.target.files?.[0] || null)
           }
@@ -61,6 +62,7 @@ export function ProblemSection({ onChange }: ProblemSectionProps) {
         <Input
           id="output-file"
           type="file"
+          accept=".txt"
           onChange={(e) =>
             updateProblem("outputFile", e.target.files?.[0] || null)
           }
