@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { S3Service } from "@repo/services";
+import { S3Service, KafkaService } from "@repo/services";
 import { prisma } from "@repo/db";
 import { HttpStatusCode } from "@repo/utils";
 import config from "../config/config";
@@ -296,6 +296,45 @@ export class ContestController {
         data: updatedContestLog,
       });
     } catch (error) {
+      next(error);
+    }
+  }
+
+  async runCode(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId, contestId, problemNo, code, language, input, output } =
+        req.body;
+
+      const payload = {
+        userId,
+        contestId,
+        problemNo,
+        code,
+        language,
+        input,
+        output,
+        timestamp: new Date().toISOString(),
+      };
+
+      const kafkaService = KafkaService.getInstance();
+      const producer = await kafkaService.getProducer();
+
+      await producer.send({
+        topic: "code-run-requests",
+        messages: [
+          {
+            key: `${userId}-${contestId}-${problemNo}`,
+            value: JSON.stringify(payload),
+          },
+        ],
+      });
+
+      res.status(HttpStatusCode.ACCEPTED).json({
+        status: "processing",
+        message: "Code submitted successfully",
+      });
+    } catch (error) {
+      console.error("Error in submitCode:", error);
       next(error);
     }
   }
