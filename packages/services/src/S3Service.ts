@@ -49,7 +49,7 @@ export class S3Service {
       body: content,
     });
 
-    return `s3://${bucket}/${key}`;
+    return `https://${bucket}.s3.amazonaws.com/${key}`;
   }
 
   async getFile(bucket: string, key: string): Promise<S3.GetObjectOutput> {
