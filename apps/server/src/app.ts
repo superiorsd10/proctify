@@ -8,6 +8,7 @@ import {
 } from "@repo/middlewares";
 import { RedisService } from "@repo/services";
 import testRoutes from "./routes/testRoutes";
+import contestRoutes from "./routes/contestRoutes";
 
 export default function createApp(): Express {
   const app = express();
@@ -23,6 +24,7 @@ export default function createApp(): Express {
   app.use(rateLimiterMiddleware);
 
   app.use("/test", testRoutes);
+  app.use("/contest", contestRoutes);
 
   app.use(errorHandlerMiddleware);
 
