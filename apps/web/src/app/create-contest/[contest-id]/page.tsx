@@ -6,6 +6,9 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { Button } from "@repo/ui/components/ui/button";
 import { ProblemSection, ProblemData } from "src/components/ProblemSection";
+import { useAuth } from "@clerk/nextjs";
+import { useToast } from "@repo/ui/components/hooks/use-toast";
+import { SERVER_BASE_URL } from "src/constants/configurationConstants";
 
 export default function CreateContest() {
   const params = useParams();
@@ -15,6 +18,9 @@ export default function CreateContest() {
   const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState("");
   const [problems, setProblems] = useState<ProblemData[]>([]);
+
+  const { userId } = useAuth();
+  const { toast } = useToast();
 
   const addProblem = () => {
     setProblems([
@@ -53,38 +59,66 @@ export default function CreateContest() {
       },
     });
 
-    return `https://your-bucket-name.s3.amazonaws.com/${filename}`;
+    return `https://superiorsd10-proctify.s3.amazonaws.com/${filename}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const problemsWithUrls = await Promise.all(
-      problems.map(async (problem, index) => {
-        const inputUrl = problem.inputFile
-          ? await uploadFile(problem.inputFile, index + 1, "input")
-          : null;
-        const outputUrl = problem.outputFile
-          ? await uploadFile(problem.outputFile, index + 1, "output")
-          : null;
+    try {
+      const problemsWithUrls = await Promise.all(
+        problems.map(async ({ inputFile, outputFile, ...rest }, index) => {
+          const inputFileUrl = inputFile
+            ? await uploadFile(inputFile, index + 1, "input")
+            : null;
+          const outputFileUrl = outputFile
+            ? await uploadFile(outputFile, index + 1, "output")
+            : null;
 
-        return {
-          ...problem,
-          inputUrl,
-          outputUrl,
-        };
-      })
-    );
+          return {
+            ...rest,
+            inputFileUrl,
+            outputFileUrl,
+          };
+        })
+      );
 
-    const contestData = {
-      title,
-      startTime,
-      duration,
-      problems: problemsWithUrls,
-    };
+      const contestData = {
+        userId,
+        contestId,
+        title,
+        startTime,
+        duration: Number(duration),
+        problems: problemsWithUrls,
+      };
 
-    console.log("Contest data:", contestData);
-    // Here you would send the contestData to your backend
+      const response = await fetch(`${SERVER_BASE_URL}/contest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contestData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create contest: ${response.statusText}`);
+      }
+
+      toast({
+        title: "Contest Created",
+        description: "Your contest was successfully created!",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error creating contest:", error);
+
+      toast({
+        title: "Error",
+        description:
+          "There was an error creating the contest. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
