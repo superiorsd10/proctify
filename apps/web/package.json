@@ -13,6 +13,7 @@
     "@aws-sdk/client-s3": "^3.705.0",
     "@aws-sdk/s3-request-presigner": "^3.705.0",
     "@clerk/nextjs": "^6.4.0",
+    "@monaco-editor/react": "^4.6.0",
     "@repo/db": "*",
     "@repo/ui": "*",
     "@repo/validation": "*",
@@ -24,6 +25,7 @@
     "next": "^14.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
     "react-webcam": "^7.2.0",
     "svix": "^1.41.0"
   },
