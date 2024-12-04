@@ -227,7 +227,7 @@ export class ContestController {
         message: "Fetched contest logs successfully",
         data: contestLogs.map((contestLog) => ({
           ...contestLog,
-          username: contestLog.user?.username, 
+          username: contestLog.user?.username,
         })),
         title: contest.title,
         pagination: {
@@ -235,6 +235,65 @@ export class ContestController {
           totalPages,
           totalContestLogs,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateContestLog(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { contestId, userId, violations } = req.body;
+
+      const contestLog = await prisma.contestLog.findFirst({
+        where: { contestId, userId },
+      });
+
+      if (!contestLog) {
+        res.status(HttpStatusCode.NOT_FOUND).json({
+          success: false,
+          message: "Contest log entry not found",
+        });
+        return;
+      }
+
+      const updatedContestLogData: Partial<typeof contestLog> = {
+        ...contestLog,
+      };
+      let updatedUfmScore = contestLog.ufmScore;
+
+      for (const violation of violations) {
+        if (violation.type in updatedContestLogData) {
+          updatedContestLogData[violation.type as keyof typeof contestLog] +=
+            violation.count;
+        }
+
+        const violationWeights: Record<string, number> = {
+          audioViolations: 1,
+          noFaceViolations: 2,
+          multipleFaceViolations: 3,
+          keypressViolations: 2,
+          rightClickViolations: 2,
+          windowChangeViolations: 2,
+          prohibitedObjectViolations: 5,
+        };
+
+        if (violation.type in violationWeights) {
+          updatedUfmScore += violation.count * violationWeights[violation.type];
+        }
+      }
+
+      updatedContestLogData.ufmScore = updatedUfmScore;
+
+      const updatedContestLog = await prisma.contestLog.update({
+        where: { id: contestLog.id },
+        data: updatedContestLogData,
+      });
+
+      res.status(HttpStatusCode.SUCCESS).json({
+        success: true,
+        message: "Contest log updated successfully",
+        data: updatedContestLog,
       });
     } catch (error) {
       next(error);
