@@ -14,12 +14,13 @@ datasource db {
 }
 
 model User {
-  id       String    @id
-  username String
-  email    String    @unique
-  tests    Test[]    @relation("UserTests")
-  logs     Log[]     @relation("UserLogs")
-  Contest  Contest[]
+  id          String       @id
+  username    String
+  email       String       @unique
+  tests       Test[]       @relation("UserTests")
+  logs        Log[]        @relation("UserLogs")
+  contests    Contest[]    @relation("UserContests")
+  contestLogs ContestLog[] @relation("UserContestLogs")
 }
 
 model Test {
@@ -50,13 +51,14 @@ model Log {
 }
 
 model Contest {
-  id        String    @id
-  title     String
-  startTime DateTime
-  duration  Int
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  problems  Problem[]
+  id         String       @id
+  title      String
+  startTime  DateTime
+  duration   Int
+  userId     String
+  user       User         @relation("UserContests", fields: [userId], references: [id])
+  problems   Problem[]
+  ContestLog ContestLog[]
 }
 
 model Problem {
@@ -69,4 +71,20 @@ model Problem {
   sampleInput    String
   sampleOutput   String
   points         Int
+}
+
+model ContestLog {
+  id                         Int     @id @default(autoincrement())
+  contestId                  String
+  userId                     String
+  audioViolations            Int     @default(0)
+  noFaceViolations           Int     @default(0)
+  multipleFaceViolations     Int     @default(0)
+  keypressViolations         Int     @default(0)
+  rightClickViolations       Int     @default(0)
+  windowChangeViolations     Int     @default(0)
+  prohibitedObjectViolations Int     @default(0)
+  ufmScore                   Int     @default(0)
+  contest                    Contest @relation(fields: [contestId], references: [id])
+  user                       User    @relation("UserContestLogs", fields: [userId], references: [id])
 }
