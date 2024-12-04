@@ -12,4 +12,6 @@ router.post(
   contestController.createContest.bind(contestController)
 );
 
+router.get("/:contestId", contestController.getContest.bind(contestController));
+
 export default router;
