@@ -5,6 +5,7 @@ import {
   createContestSchema,
   joinContestSchema,
   runCodeSchema,
+  submitCodeSchema,
   updateContestLogsSchema,
 } from "@repo/validation";
 
@@ -40,6 +41,27 @@ router.post(
   "/run-code",
   validationMiddleware(runCodeSchema),
   contestController.runCode.bind(contestController)
+);
+
+router.get(
+  "/run-code/result",
+  contestController.getRunCodeResult.bind(contestController)
+);
+
+router.post(
+  "/submit-code",
+  validationMiddleware(submitCodeSchema),
+  contestController.submitCode.bind(contestController)
+);
+
+router.get(
+  "/submit-code/result",
+  contestController.getSubmitCodeResult.bind(contestController)
+);
+
+router.get(
+  "/leaderboard/get",
+  contestController.getContestLeaderboard.bind(contestController)
 );
 
 export default router;
