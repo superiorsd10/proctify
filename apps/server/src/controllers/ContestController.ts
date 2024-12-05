@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { S3Service, KafkaService } from "@repo/services";
+import { S3Service, KafkaService, RedisService } from "@repo/services";
 import { prisma } from "@repo/db";
 import { HttpStatusCode } from "@repo/utils";
 import config from "../config/config";
+import { nanoid } from "nanoid";
 
 const s3Service = S3Service.getInstance();
+const redisService = RedisService.getInstance();
 
 export class ContestController {
   async createContest(req: Request, res: Response, next: NextFunction) {
@@ -44,9 +46,11 @@ export class ContestController {
         },
       });
 
-      res
-        .status(HttpStatusCode.CREATED)
-        .json({ success: true, message: "Contest created successfully" });
+      res.status(HttpStatusCode.CREATED).json({
+        success: true,
+        message: "Contest created successfully",
+        code: contestId,
+      });
     } catch (error) {
       next(error);
     }
@@ -302,13 +306,12 @@ export class ContestController {
 
   async runCode(req: Request, res: Response, next: NextFunction) {
     try {
-      const { userId, contestId, problemNo, code, language, input, output } =
-        req.body;
+      const { code, language, input, output } = req.body;
+
+      const runId = nanoid(10);
 
       const payload = {
-        userId,
-        contestId,
-        problemNo,
+        runId,
         code,
         language,
         input,
@@ -323,7 +326,7 @@ export class ContestController {
         topic: "code-run-requests",
         messages: [
           {
-            key: `${userId}-${contestId}-${problemNo}`,
+            key: runId,
             value: JSON.stringify(payload),
           },
         ],
@@ -332,9 +335,151 @@ export class ContestController {
       res.status(HttpStatusCode.ACCEPTED).json({
         status: "processing",
         message: "Code submitted successfully",
+        runId,
+      });
+    } catch (error) {
+      console.error("Error in runCode:", error);
+      next(error);
+    }
+  }
+
+  async getRunCodeResult(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { runId } = req.query;
+
+      if (!runId) {
+        res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ message: "Missing required query parameter" });
+        return;
+      }
+
+      const key = `runCode:${runId}`;
+
+      const result = await redisService.get(key);
+
+      if (!result) {
+        res.status(HttpStatusCode.NOT_FOUND).json({ message: "processing" });
+        return;
+      }
+
+      res.status(HttpStatusCode.SUCCESS).json(JSON.parse(result));
+    } catch (error) {
+      console.error("Error fetching contest result:", error);
+      next(error);
+    }
+  }
+
+  async submitCode(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId, contestId, problemId, problemNo, code, language } =
+        req.body;
+
+      const runId = nanoid(10);
+
+      const payload = {
+        runId,
+        userId,
+        contestId,
+        problemId,
+        problemNo,
+        code,
+        language,
+        timestamp: new Date().toISOString(),
+      };
+
+      const kafkaService = KafkaService.getInstance();
+      const producer = await kafkaService.getProducer();
+
+      await producer.send({
+        topic: "code-submit-requests",
+        messages: [
+          {
+            key: runId,
+            value: JSON.stringify(payload),
+          },
+        ],
+      });
+
+      res.status(HttpStatusCode.ACCEPTED).json({
+        status: "processing",
+        message: "Code submitted successfully",
+        runId,
       });
     } catch (error) {
       console.error("Error in submitCode:", error);
+      next(error);
+    }
+  }
+
+  async getSubmitCodeResult(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { runId } = req.query;
+
+      if (!runId) {
+        res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ message: "Missing required query parameter" });
+        return;
+      }
+
+      const key = `submitCode:${runId}`;
+
+      const result = await redisService.get(key);
+
+      if (!result) {
+        res.status(HttpStatusCode.NOT_FOUND).json({ message: "processing" });
+        return;
+      }
+
+      res.status(HttpStatusCode.SUCCESS).json(JSON.parse(result));
+    } catch (error) {
+      console.error("Error fetching contest result:", error);
+      next(error);
+    }
+  }
+
+  async getContestLeaderboard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { contestId, page } = req.query;
+
+      const leaderboardData = await redisService.getContestLeaderboard(
+        contestId as string,
+        Number(page)
+      );
+
+      const userIds = leaderboardData.map((entry) => entry.userId);
+
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, username: true },
+      });
+
+      const userMap = users.reduce(
+        (map, user) => ({ ...map, [user.id]: user.username }),
+        {}
+      );
+
+      const leaderboardWithUsernames = leaderboardData.map((entry) => ({
+        username: userMap[entry.userId] || "Unknown User",
+        score: entry.score,
+        details: entry.details,
+      }));
+
+      const pageNumber = parseInt(page as string, 10);
+      const key = `contestPerformance:${contestId}`;
+      const totalMembers = (await redisService.zCard(key)) || 0;
+      const totalPages = Math.ceil(totalMembers / 10);
+
+      res.status(HttpStatusCode.SUCCESS).json({
+        success: true,
+        data: leaderboardWithUsernames,
+        pagination: {
+          pageNumber,
+          totalPages,
+        },
+      });
+    } catch (error) {
       next(error);
     }
   }
