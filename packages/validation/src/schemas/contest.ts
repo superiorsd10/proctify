@@ -44,11 +44,17 @@ export const updateContestLogsSchema = z.object({
 });
 
 export const runCodeSchema = z.object({
-  contestId: z.string().min(1, "Contest ID is required"),
-  userId: z.string().min(1, "User ID is required"),
-  problemNo: z.string().min(1, "Problem No is required"),
   code: z.string().min(1, "Code is required"),
   language: z.enum(["javascript", "python", "java", "cpp"]),
   input: z.string().min(1, "Input is required"),
   output: z.string().min(1, "Output is required"),
+});
+
+export const submitCodeSchema = z.object({
+  contestId: z.string().min(1, "Contest ID is required"),
+  userId: z.string().min(1, "User ID is required"),
+  problemId: z.string().min(1, "Problem ID is required"),
+  problemNo: z.string().min(1, "Problem No is required"),
+  code: z.string().min(1, "Code is required"),
+  language: z.enum(["javascript", "python", "java", "cpp"]),
 });
