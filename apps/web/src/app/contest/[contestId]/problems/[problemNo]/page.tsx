@@ -35,7 +35,8 @@ export default async function ProblemPage({
         <h1 className="text-3xl font-bold mb-4">{contest.title}</h1>
         <ProblemDetails problem={problem} description={description} />
         <CodeEditor
-          problemId={problem.id}
+          problemId={String(problem.id)}
+          problemNo={params.problemNo}
           contestId={params.contestId}
           sampleInput={problem.sampleInput}
           sampleOutput={problem.sampleOutput}
