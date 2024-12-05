@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ProctoringMonitor } from "src/components/ProctoringMonitor";
 import { CountdownTimer } from "./countdown-timer";
+import { ProctoringMonitor } from "src/components/ProctoringMonitor";
 
 export function ProctoringContent({
   url,
@@ -40,10 +40,8 @@ export function ProctoringContent({
   }
 
   return (
-    <div className="relative">
-      <div className="absolute top-0 left-0 z-10">
-        <ProctoringMonitor url={url} code={code} />
-      </div>
-    </div>
+    <ProctoringMonitor code={code}>
+      <iframe src={url} className="w-full h-full border-none" title="Test" />
+    </ProctoringMonitor>
   );
 }
