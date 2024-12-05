@@ -51,8 +51,4 @@ export class S3Service {
 
     return `https://${bucket}.s3.amazonaws.com/${key}`;
   }
-
-  async getFile(bucket: string, key: string): Promise<S3.GetObjectOutput> {
-    return this.s3.getObject({ Bucket: bucket, Key: key }).promise();
-  }
 }
