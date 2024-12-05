@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { Contest } from "src/types/contest";
@@ -37,10 +37,10 @@ export function ContestDetails({ contest }: { contest: Contest }) {
   };
 
   return (
-    <div className="mb-6">
+    <div className="text-center space-y-4">
       <h1 className="text-3xl font-bold mb-2">{contest.title}</h1>
       <p className="text-xl mb-2">{timeRemaining}</p>
-      <p>Duration: {contest.duration} minutes</p>
+      <p className="text-sm">Duration: {contest.duration} minutes</p>
     </div>
   );
 }
