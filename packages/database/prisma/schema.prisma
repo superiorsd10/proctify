@@ -21,6 +21,7 @@ model User {
   logs        Log[]        @relation("UserLogs")
   contests    Contest[]    @relation("UserContests")
   contestLogs ContestLog[] @relation("UserContestLogs")
+  Submission  Submission[]
 }
 
 model Test {
@@ -59,18 +60,20 @@ model Contest {
   user       User         @relation("UserContests", fields: [userId], references: [id])
   problems   Problem[]
   ContestLog ContestLog[]
+  Submission Submission[]
 }
 
 model Problem {
-  id             Int     @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   contestId      String
-  contest        Contest @relation(fields: [contestId], references: [id])
+  contest        Contest      @relation(fields: [contestId], references: [id])
   descriptionUrl String
   inputFileUrl   String
   outputFileUrl  String
   sampleInput    String
   sampleOutput   String
   points         Int
+  Submission     Submission[]
 }
 
 model ContestLog {
@@ -87,4 +90,20 @@ model ContestLog {
   ufmScore                   Int     @default(0)
   contest                    Contest @relation(fields: [contestId], references: [id])
   user                       User    @relation("UserContestLogs", fields: [userId], references: [id])
+}
+
+model Submission {
+  id            Int      @id @default(autoincrement())
+  userId        String
+  contestId     String
+  problemId     Int
+  problemNo     Int
+  submittedTime DateTime
+  solvedTime    Int // Difference between submittedTime and contest's startTime (in seconds)
+  status        String // Possible values: "Pending", "Correct", "Wrong", "Error", etc.
+  code          String
+  language      String
+  user          User     @relation(fields: [userId], references: [id])
+  contest       Contest  @relation(fields: [contestId], references: [id])
+  problem       Problem  @relation(fields: [problemId], references: [id])
 }
