@@ -108,7 +108,7 @@ export function ProctoringContestMonitor({
     if (violationsArray.length > 0) {
       const violationData = {
         userId,
-        testId: code,
+        contestId: code,
         violations: violationsArray,
       };
 
