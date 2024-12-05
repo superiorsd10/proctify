@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useCallback, useRef } from "react";
 import Webcam from "react-webcam";
 import { useDetection } from "../hooks/detection/useDetection";
@@ -8,16 +9,14 @@ import { SERVER_BASE_URL } from "src/constants/configurationConstants";
 import { useAuth } from "@clerk/nextjs";
 
 export function ProctoringMonitor({
-  url,
+  children,
   code,
 }: {
-  url: string;
+  children: React.ReactNode;
   code: string;
 }) {
   const { toast } = useToast();
-
   const violationCountsRef = useRef<Record<string, number>>({});
-
   const { userId } = useAuth();
 
   const handleBrowserViolation = useCallback(
@@ -72,12 +71,10 @@ export function ProctoringMonitor({
     onBrowserViolation: handleBrowserViolation,
   });
 
-  // Request fullscreen on mount
   useEffect(() => {
     enterFullscreen();
   }, [enterFullscreen]);
 
-  // Keep track of previous violations
   const previousViolationsRef = useRef<{ type: string; message: string }[]>([]);
 
   const processDetection = useCallback(async () => {
@@ -88,12 +85,10 @@ export function ProctoringMonitor({
         (violationCountsRef.current[violation.type] || 0) + 1;
     });
 
-    // Only show toasts for new violations that weren't present in the previous check
     const newViolations = currentViolations.filter(
       (violation) => !previousViolationsRef.current.includes(violation)
     );
 
-    // Show toasts for new violations only
     newViolations.forEach((violation) => {
       toast({
         variant: "destructive",
@@ -102,7 +97,6 @@ export function ProctoringMonitor({
       });
     });
 
-    // Update previous violations for next comparison
     previousViolationsRef.current = currentViolations;
   }, [runDetection, toast]);
 
@@ -136,7 +130,7 @@ export function ProctoringMonitor({
         });
       }
     }
-  }, []);
+  }, [code, userId, toast]);
 
   useEffect(() => {
     const detectionInterval = setInterval(processDetection, 3000);
@@ -150,8 +144,8 @@ export function ProctoringMonitor({
   if (isLoading) return <div>Loading Detection Model...</div>;
 
   return (
-    <div className="relative w-full h-screen">
-      <div className="absolute top-4 left-4 z-50">
+    <div className="relative w-full h-screen" ref={canvasRef}>
+      <div className="absolute top-4 right-4 z-50">
         <Webcam
           ref={webcamRef}
           className="w-48 h-36 rounded-md border border-gray-300"
@@ -164,12 +158,7 @@ export function ProctoringMonitor({
           }}
         />
       </div>
-      <iframe
-        ref={canvasRef}
-        src={url}
-        className="w-full h-full border-none"
-        title="Test"
-      />
+      {children}
     </div>
   );
 }
