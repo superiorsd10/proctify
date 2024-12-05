@@ -39,12 +39,12 @@ export default function JoinContest() {
     }
 
     const testData = {
-      testId: code,
+      contestId: code,
       userId: userId,
     };
 
     try {
-      const response = await fetch(`${SERVER_BASE_URL}/test/join`, {
+      const response = await fetch(`${SERVER_BASE_URL}/contest/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,9 +61,7 @@ export default function JoinContest() {
           description: data.message || "You have successfully joined the test.",
         });
 
-        router.push(
-          `/proctor?url=${encodeURIComponent(data.link)}&startTime=${data.startTime}&code=${code}`
-        );
+        router.push(`/contest/${code}`);
       } else {
         const errorData = await response.json();
 
