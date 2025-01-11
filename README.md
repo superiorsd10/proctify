@@ -1,4 +1,4 @@
-# Proctify
+# proctify
 
 ## Description
 Proctify is an innovative proctoring platform designed to enhance the integrity of online tests and coding competitions. The platform allows users to host third-party linked tests (e.g., Google Forms, coding websites, or other test links) or create their own coding contests with custom questions, inputs, and outputs. Proctify ensures a secure and fair environment with advanced proctoring features and real-time monitoring capabilities.
