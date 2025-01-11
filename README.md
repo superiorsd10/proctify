@@ -9,7 +9,7 @@ Proctify is an innovative proctoring platform designed to enhance the integrity 
 - [Installation](#installation)
 - [Folder Structure](#folder-structure)
 - [Usage](#usage)
-- [Screenshots] (#screenshots)
+- [Screenshots](#screenshots)
 - [Contributing](#contributing)
 - [Contact](#contact)
 
@@ -146,6 +146,10 @@ Proctify is designed with a modular architecture using Turborepo for efficient p
 
 ## Screenshots
 
+![SCR-20241205-byn](https://github.com/user-attachments/assets/3fe92396-690b-44db-88e7-5f642599f5b8)
+![SCR-20241205-byw](https://github.com/user-attachments/assets/0f658f1b-e7b6-4355-a7e3-79a00ce27baa)
+![SCR-20241205-bli](https://github.com/user-attachments/assets/01c7541e-a10e-45e8-bf09-c94ddddc2a72)
+![SCR-20241205-blr](https://github.com/user-attachments/assets/e2ea7755-c54e-41d3-82db-0756697c6f5c)
 
 
 ## Contributing
